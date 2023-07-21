@@ -3,7 +3,7 @@ FROM node
 # Install app dependencies
 COPY package*.json ./
 
-RUN npm ci --force
+RUN npm install --force
 
 # Bundle app source
 COPY . .

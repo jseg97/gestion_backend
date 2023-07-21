@@ -6,6 +6,7 @@
 // ];
 
 const { Pool } = require('pg');
+const fs = require('fs');
 
 let comments=[];
 module.exports = {
@@ -18,11 +19,13 @@ module.exports = {
 const pool = new Pool({
     user: 'doadmin',
     host: 'db-postgresql-nyc3-55749-do-user-14409895-0.b.db.ondigitalocean.com', // Replace this with your PostgreSQL host
-    database: 'defaultdb',
+    database: 'postgres',
     password: 'AVNS_u6LrVShOfxUpCg4WnGL',
     port: 25060, // Default PostgreSQL port is 5432
     max: 20,
-    ssl: true
+    ssl: {
+        ca: fs.readFileSync('./ca-certificate.crt'),
+    }
 });
 
 async function getAll() {
