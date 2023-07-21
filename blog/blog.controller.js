@@ -10,6 +10,7 @@ router.get('/', getAll); // admin only
 router.get('/:id', getById); // admin only
 router.put('/', authorize(Role.BlogAdmin), updateBlog);
 router.post('/', authorize(Role.BlogAdmin), createBlog);
+router.delete('/', authorize(Role.BlogAdmin), inactiveBlog);
 // router.get('/:id', authorize(), getById);       // all authenticated users
 module.exports = router;
 
@@ -38,7 +39,8 @@ function updateBlog(req, res, next) {
     .then((b) => {
         console.log("CONTROLLER");
         console.log(JSON.stringify(b));
-        res.json(b);
+        res.json({'success': b});
+        
     }).catch(err => next(err));
     
 }
@@ -54,6 +56,21 @@ function createBlog(req, res, next) {
         console.log("CONTROLLER");
         console.log(JSON.stringify(b));
         res.json(b);
+    }).catch(err => next(err));
+    
+}
+
+function inactiveBlog(req, res, next) {
+    let query = req.query;
+    let body = req.body;
+    console.log(body);
+    let headers = req.headers;
+    blogService.inactiveBlog(body)
+    .then((b) => {
+        console.log("CONTROLLER");
+        console.log(JSON.stringify(b));
+        res.json({'success': b});
+        
     }).catch(err => next(err));
     
 }

@@ -1,42 +1,40 @@
-const comments = [
-    { id: 1, userId: 1, content: 'b1Esto es un comentario creado por user 1', blogId: 1, created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
-    { id: 2, userId: 2, content: 'b3Esto es un comentario creado por user 2', blogId: 3, created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
-    { id: 3, userId: 3, content: 'b2Esto es un comentario creado por user 3', blogId: 2, created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},    
-    { id: 4, userId: 3, content: 'b2Esto es un comentario creado por user 3', blogId: 2, created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)}    
-];
+// const comments = [
+//     { id: 1, userId: 1, content: 'b1Esto es un comentario creado por user 1', blogId: 1, created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
+//     { id: 2, userId: 2, content: 'b3Esto es un comentario creado por user 2', blogId: 3, created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
+//     { id: 3, userId: 3, content: 'b2Esto es un comentario creado por user 3', blogId: 2, created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},    
+//     { id: 4, userId: 3, content: 'b2Esto es un comentario creado por user 3', blogId: 2, created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)}    
+// ];
 
+const { Pool } = require('pg');
+
+let comments=[];
 module.exports = {
     getAll,
     updateComment,
-    createComment
+    createComment,
+    inactiveComment
 };
 
-
+const pool = new Pool({
+    user: 'postgres',
+    host: 'localhost', // Replace this with your PostgreSQL host
+    database: 'postgres',
+    password: 'postgres',
+    port: 5432, // Default PostgreSQL port is 5432
+    max: 20
+});
 
 async function getAll() {
-    console.log("List");
+    const res = await pool.query(`SELECT c.*, u."firstName" first_name FROM comments c INNER JOIN users u ON c.user_create = u.id`);
+    comments = res.rows;
     return comments;
 }
 
 async function updateComment(commentData) {
-    console.log("Update");
-    let comment;
+    
+    const res = await pool.query(`UPDATE comments c SET content=$1, updated=$2, user_update=$3 WHERE c.id=$4`,[commentData.content, new Date().toISOString().slice(0, 10), commentData.userId, commentData.id]);
 
-    comment = comments.filter(function(b) { 
-        return b.id === commentData.id;
-    })[0];
-
-    console.log(comment);
-    comment.id = commentData.id;
-    comment.userId = commentData.userId;
-    comment.content = commentData.content;
-    comment.blogId = commentData.blogId;
-    comment.updated_at = new Date().getFullYear();
-
-    console.log("SERVICE");
-    console.log(JSON.stringify(comment));
-
-    return comment;
+    return true;
 }
 
 async function createComment(commentData) {
@@ -44,20 +42,25 @@ async function createComment(commentData) {
     console.log(commentData);
     let comment = {};
 
-    comment["id"] = commentData.id;
     comment["userId"] = commentData.userId;
     comment["content"] = commentData.content;
     comment["blogId"] = commentData.blogId;
-    comment["updated_at"] = new Date().toISOString().slice(0, 10);
     comment["created_at"] = new Date().toISOString().slice(0, 10);
 
-    console.log("Paso");
-    comments.push(comment)
-    console.log(comments);
 
-    console.log("SERVICE");
-    console.log(JSON.stringify(comment));
+    try {
+        const res  = await pool.query(`INSERT INTO comments (content, created, user_create, blog_id) VALUES ($1,$2,$3,$4)`,[comment.content, comment.created_at, comment.userId, comment.blogId] )
+        comments.push(comment);
+    }catch(e) {    
+        return {"success": false, "message":e.message}
+    };
 
-    return comment;
+    return { "success": true, "message":"created successfully", "data": comments};;
+}
+
+async function inactiveComment(commentData) {
+   
+    const res = await pool.query(`UPDATE blog SET is_active=$1, updated=$2, user_update=$3 WHERE id=$4`, ['N', new Date().toISOString().slice(0, 10), commentData.user_update, comment.id]);
+    return true;
 }
 

@@ -1,52 +1,58 @@
-const blogs = [
-    { id: 1, title: 'Este es un titulo de" blog plena', description: 'Descripcion de este blog', content: 'texto 11111111111111111bla bla bla bla', created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
-    { id: 2, title: 'Este es un titulo de blog 2 oss', description: 'Descripcion de este blog', content: 'texto 22222222222222222bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
-    { id: 3, title: 'Este es un titulo de blog 3 meen', description: 'Descripcion de este blog', content: 'texto 333333333333333bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
-    { id: 4, title: 'Este es un titulo de" blog plena', description: 'Descripcion de este blog', content: 'texto 11111111111111111bla bla bla bla', created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
-    { id: 5, title: 'Este es un titulo de blog 2 oss', description: 'Descripcion de este blog', content: 'texto 22222222222222222bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
-    { id: 6, title: 'Este es un titulo de blog 3 meen', description: 'Descripcion de este blog', content: 'texto 333333333333333bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)} ,
-    { id: 7, title: 'Este es un titulo de" blog plena', description: 'Descripcion de este blog', content: 'texto 11111111111111111bla bla bla bla', created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
-    { id: 8, title: 'Este es un titulo de blog 2 oss', description: 'Descripcion de este blog', content: 'texto 22222222222222222bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
-    { id: 9, title: 'Este es un titulo de blog 3 meen', description: 'Descripcion de este blog', content: 'texto 333333333333333bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)}     
-];
+const { Pool } = require('pg');
+// const blogs = [
+//     { id: 1, title: 'Este es un titulo de" blog plena', description: 'Descripcion de este blog', content: 'texto 11111111111111111bla bla bla bla', created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
+//     { id: 2, title: 'Este es un titulo de blog 2 oss', description: 'Descripcion de este blog', content: 'texto 22222222222222222bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
+//     { id: 3, title: 'Este es un titulo de blog 3 meen', description: 'Descripcion de este blog', content: 'texto 333333333333333bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
+//     { id: 4, title: 'Este es un titulo de" blog plena', description: 'Descripcion de este blog', content: 'texto 11111111111111111bla bla bla bla', created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
+//     { id: 5, title: 'Este es un titulo de blog 2 oss', description: 'Descripcion de este blog', content: 'texto 22222222222222222bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
+//     { id: 6, title: 'Este es un titulo de blog 3 meen', description: 'Descripcion de este blog', content: 'texto 333333333333333bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)} ,
+//     { id: 7, title: 'Este es un titulo de" blog plena', description: 'Descripcion de este blog', content: 'texto 11111111111111111bla bla bla bla', created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
+//     { id: 8, title: 'Este es un titulo de blog 2 oss', description: 'Descripcion de este blog', content: 'texto 22222222222222222bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
+//     { id: 9, title: 'Este es un titulo de blog 3 meen', description: 'Descripcion de este blog', content: 'texto 333333333333333bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)}     
+// ];
+
+let blogs = [];
 
 module.exports = {
     getAll,
     getById,
     updateBlog,
-    createBlog
+    createBlog,
+    inactiveBlog
 };
 
-
+const pool = new Pool({
+    user: 'postgres',
+    host: 'localhost', // Replace this with your PostgreSQL host
+    database: 'postgres',
+    password: 'postgres',
+    port: 5432, // Default PostgreSQL port is 5432
+    max: 20
+});
 
 async function getAll() {
     console.log("List");
+    const res = await pool.query(`SELECT b.*, u."firstName", u.id user_id FROM blog b INNER JOIN users u ON b.user_created = u.id`);
+    blogs = res.rows
+    console.log("Afuera: ");
+
     return blogs;
 }
 
 async function getById(id) {
-    const blog = blogs.find(b => b.id === parseInt(id));
-    console.log(blog);
-    return blog ?  blog : null;
+    const res = await pool.query(`SELECT * FROM blog b where b.id = $1`,[id]);
+    console.log(res.rows);
+    return res.rows[0];
 }
 
 async function updateBlog(blogData) {
     console.log("Update");
     let blog;
+    console.log("List");
+    const res = await pool.query(`UPDATE blog SET title=$1, description=$2, content=$3, updated=$4, user_updated=$5 WHERE id=$6`, [blogData.title, blogData.description, blogData.content, blogData.updated, blogData.user_updated, blogData.id]);
 
-    blog = blogs.filter(function(b) { 
-        return b.id === blogData.id;
-    })[0];
 
-    console.log(blog);
-    blog.title = blogData.title;
-    blog.content = blogData.content;
-    blog.updated_at = new Date().getFullYear();
-
-    console.log("SERVICE");
-    console.log(JSON.stringify(blog));
-
-    return blog;
+    return true;
 }
 
 async function createBlog(blogData) {
@@ -54,19 +60,27 @@ async function createBlog(blogData) {
     console.log(blogData);
     let blog = {};
 
-    blog["id"] = blogData.id;
+    // blog["id"] = blogData.id;
     blog["title"] = blogData.title;
     blog["content"] = blogData.content;
-    blog["updated_at"] = new Date().toISOString().slice(0, 10);
-    blog["created_at"] = new Date().toISOString().slice(0, 10);
+    blog["description"] = blogData.description;
+    blog["created"] = new Date().toISOString().slice(0, 10);
+    blog["user_created"] = blogData.user_created;
 
-    console.log("Paso");
-    blogs.push(blog)
-    console.log(blogs);
+    try {
+        const res = await pool.query(`INSERT INTO blog (title, description, content, created, user_created) VALUES ($1, $2, $3, $4, $5)`, [blog.title, blog.description, blog.content, blog.created, blog.user_created]);
+        blogs.push(blog);
+    } catch (e) {
+        return { "success": false, "message": e.message };
+    }
+    return { "success": true, "message":"created successfully", "data": blogs};
+}
 
-    console.log("SERVICE");
-    console.log(JSON.stringify(blog));
+async function inactiveBlog(blogData) {
+    let blog;
+    const res = await pool.query(`UPDATE blog SET is_active=$1, updated=$2, user_updated=$3 WHERE id=$4`, ['N', new Date().toISOString().slice(0, 10), blogData.user_update, blogData.id]);
 
-    return blog;
+
+    return true;
 }
 

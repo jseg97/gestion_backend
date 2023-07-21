@@ -6,10 +6,12 @@ const Role = require('_helpers/role');
 
 // routes
 router.post('/authenticate', authenticate);     // public route
-router.get('/', authorize(Role.Admin), getAll); // admin only
+router.get('/', authorize(Role.Admin, Role.BlogAdmin), getAll); // admin only
+// router.get('/ga', getAll); // admin only
 router.get('/:id', authorize(), getById);       // all authenticated users
 router.put('/', authorize(), update);       // all authenticated users
 router.post('/', authorize(), create);       // all authenticated users
+// router.post('/', createPublicly);       // all authenticated users
 
 module.exports = router;
 
@@ -40,13 +42,23 @@ function getById(req, res, next) {
 }
 
 function update(req, res, next) {
+    console.log("LLEGO");
+    console.log(req.body);
     userService.updateUser(req.body)
         .then(user => user ? res.json(user) : res.status(400).json({ message: 'Username or password is incorrect' }))
         .catch(err => next(err));
 }
 
 function create(req, res, next) {
+    console.log(req.body);
     userService.createUser(req.body)
+        .then(user => user ? res.json(user) : res.status(400).json({ message: 'Username or password is incorrect' }))
+        .catch(err => next(err));
+}
+
+function createPublicly(req, res, next) {
+    console.log(req.body);
+    userService.createUserAsUser(req.body)
         .then(user => user ? res.json(user) : res.status(400).json({ message: 'Username or password is incorrect' }))
         .catch(err => next(err));
 }

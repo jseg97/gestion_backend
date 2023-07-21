@@ -1,37 +1,59 @@
 ﻿const config = require('config.json');
 const jwt = require('jsonwebtoken');
 const Role = require('_helpers/role');
+const { Pool } = require('pg');
 
 // users hardcoded for simplicity, store in a db for production applications
-const users = [
-    { id: 1, username: 'admin', password: 'admin', firstName: 'Admin', lastName: 'User', email: 'gerencia@gthca.com', role: Role.Admin },
-    { id: 2, username: 'user', password: 'user', firstName: 'Normal', lastName: 'User', email: 'user@hotmail.com', role: Role.User },
-    { id: 3, username: 'blogger', password: 'blogger2023', firstName: 'Blogger', lastName: 'Blogger', email: 'caviles@gthca.com', role: Role.BlogAdmin },
-];
+// const users = [
+//     { id: 1, username: 'admin', password: 'admin', firstName: 'Admin', lastName: 'User', email: 'gerencia@gthca.com', role: Role.Admin },
+//     { id: 2, username: 'user', password: 'user', firstName: 'Normal', lastName: 'User', email: 'user@hotmail.com', role: Role.User },
+//     { id: 3, username: 'blogger', password: 'blogger2023', firstName: 'Blogger', lastName: 'Blogger', email: 'caviles@gthca.com', role: Role.BlogAdmin },
+// ];
+
+let users = [];
+const pool = new Pool({
+    user: 'postgres',
+    host: 'localhost', // Replace this with your PostgreSQL host
+    database: 'postgres',
+    password: 'postgres',
+    port: 5432, // Default PostgreSQL port is 5432
+    max: 20
+});
 
 module.exports = {
     authenticate,
     getAll,
     getById,
     createUser,
-    updateUser
+    updateUser,
+    createUserAsUser
 };
 
 async function authenticate({ username, password }) {
+    console.log({ username, password });
     const user = users.find(u => u.username === username && u.password === password);
     if (user) {
         const token = jwt.sign({ sub: user.id, role: user.role }, config.secret);
         const { password, ...userWithoutPassword } = user;
         console.log("autenticado");
         return {
-            
             ...userWithoutPassword,
             token
         };
     }
 }
 
+
+
+
+
 async function getAll() {
+    pool.query("SELECT * FROM USERS", (err, res) => {
+        // console.log("LLEGO" + res.rowCount);
+        // console.log(res.rows);
+        // pool.end();
+        users = res.rows;
+    });
     return users.map(u => {
         const { password, ...userWithoutPassword } = u;
         return userWithoutPassword;
@@ -46,15 +68,14 @@ async function getById(id) {
 }
 
 async function updateUser(userData) {
-    console.log("Update");
+    // getAll();
+    //console.log(users);
     let user;
-
-    user = users.filter(function(b) { 
+    user = users.filter(function (b) {
         return b.id === userData.id;
-    })[0];
-
-    console.log(user);
-    
+    });
+    user = user[0];
+    //console.log(user);
     user.id = user.id;
     user.username = userData.username;
     user.password = userData.password;
@@ -63,18 +84,24 @@ async function updateUser(userData) {
     user.email = userData.email;
     user.role = userData.role;
 
-    console.log("SERVICE");
-    console.log(user);
+    pool.query(`UPDATE users SET username=$1, password=$2, "firstName"=$3, "lastName"=$4, email=$5, role=$6 WHERE id=$7`, [user.username, user.password, user.firstName, user.lastName, user.email, user.role, user.id], (err, res) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        return res.rows ? res.rows : users;
+    });
+    //console.log("SERVICE");
+    //console.log(user);
 
     return user;
 }
 
-async function createUser(userData) {
-    console.log("Create");
-    console.log(userData);
-    let user = {};
 
-    user["id"] = userData.id;
+async function createUser(userData) {
+    let user = {};
+    console.log("CREANDO");
+    console.log(userData);
     user["username"] = userData.username;
     user["password"] = userData.password;
     user["firstName"] = userData.firstName;
@@ -82,12 +109,38 @@ async function createUser(userData) {
     user["email"] = userData.email;
     user["role"] = userData.role;
 
-    console.log("Paso");
-    users.push(user)
+    console.log("CREANDO");
     console.log(user);
 
-    console.log("SERVICE");
-    console.log(JSON.stringify(user));
+    pool.query(`INSERT INTO users (username, password, "firstName", "lastName", email, role) VALUES ($1, $2, $3, $4, $5, $6)`, [user.username, user.password, user.firstName, user.lastName, user.email, user.role], (err, res) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        return res.rows ? res.rows : users;
+    });
 
-    return users;
+    return user;
 }
+
+async function createUserAsUser(userData) {
+    let user = {};
+    user["username"] = userData.username;
+    user["password"] = userData.password;
+    user["firstName"] = userData.firstName;
+    user["lastName"] = userData.lastName;
+    user["email"] = userData.email;
+    user["role"] = Role.User;
+
+    pool.query(`INSERT INTO users (username, password, "firstName", "lastName", email, role) VALUES ($1, $2, $3, $4, $5, $6)`, [user.username, user.password, user.firstName, user.lastName, user.email, user.role], (err, res) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        return res.rows ? res.rows : users;
+    });
+
+    return user;
+}
+
+getAll();
