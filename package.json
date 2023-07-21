@@ -13,7 +13,7 @@
         "url": ""
     },
     "scripts": {
-        "start": "nodemon ./server.js"
+        "start": "node ./server.js"
     },
     "dependencies": {
         "body-parser": "^1.18.3",
