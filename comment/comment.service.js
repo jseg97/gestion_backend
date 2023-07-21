@@ -21,7 +21,8 @@ const pool = new Pool({
     database: 'defaultdb',
     password: 'AVNS_u6LrVShOfxUpCg4WnGL',
     port: 25060, // Default PostgreSQL port is 5432
-    max: 20
+    max: 20,
+    ssl: true
 });
 
 async function getAll() {
