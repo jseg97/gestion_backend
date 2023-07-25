@@ -51,9 +51,10 @@ async function getById(id) {
 
 async function updateBlog(blogData) {
     console.log("Update");
+    blogData["updated"] = new Date().toISOString().slice(0, 10);
     let blog;
     console.log("List");
-    const res = await pool.query(`UPDATE blog SET title=$1, description=$2, content=$3, updated=$4, user_updated=$5 WHERE id=$6`, [blogData.title, blogData.description, blogData.content, blogData.updated, blogData.user_updated, blogData.id]);
+    const res = await pool.query(`UPDATE blog SET title=$1, description=$2, content=$3, updated=$4, user_updated=$5, is_active=$6 WHERE id=$7`, [blogData.title, blogData.description, blogData.content, blogData.updated, blogData.user_updated, blogData.is_active, blogData.id]);
 
 
     return true;

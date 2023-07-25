@@ -13,7 +13,9 @@ module.exports = {
     getAll,
     updateComment,
     createComment,
-    inactiveComment
+    inactiveComment,
+    getFromBlogId,
+    getCommentById
 };
 
 const pool = new Pool({
@@ -34,9 +36,32 @@ async function getAll() {
     return comments;
 }
 
+// const res = await pool.query(`SELECT b.*, u."firstName", u.id user_id FROM blog b INNER JOIN users u ON b.user_created = u.id`);
+async function getFromBlogId(id){
+    const res = await pool.query(`SELECT c.*, b.id blogId, u."firstName" first_name 
+                                    FROM comments c 
+                                    INNER JOIN blog b ON b.id = c.blog_id 
+                                    INNER JOIN users u ON u.id = c.user_create  
+                                    WHERE b.id = $1 `,[id]);
+                                    // and c.is_active='Y'
+    console.log(res.rows);
+    return res.rows;
+}
+
+async function getCommentById(id){
+    const res = await pool.query(`SELECT c.*, b.id blogId, u."firstName" first_name 
+                                    FROM comments c 
+                                    INNER JOIN blog b ON b.id = c.blog_id 
+                                    INNER JOIN users u ON u.id = c.user_create  
+                                    WHERE c.id = $1 `,[id]);
+                                    // and c.is_active='Y'
+    console.log(res.rows);
+    return res.rows[0];
+}
+
 async function updateComment(commentData) {
     
-    const res = await pool.query(`UPDATE comments c SET content=$1, updated=$2, user_update=$3 WHERE c.id=$4`,[commentData.content, new Date().toISOString().slice(0, 10), commentData.userId, commentData.id]);
+    const res = await pool.query(`UPDATE comments c SET content=$1, updated=$2, user_update=$3, is_active=$4 WHERE c.id=$5`,[commentData.content, new Date().toISOString().slice(0, 10), commentData.userId, commentData.is_active, commentData.id]);
 
     return true;
 }

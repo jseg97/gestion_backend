@@ -30,7 +30,9 @@ module.exports = {
     getById,
     createUser,
     updateUser,
-    createUserAsUser
+    createUserAsUser,
+    userExists,
+    updateStatus
 };
 
 async function authenticate({ username, password }) {
@@ -73,6 +75,23 @@ async function getById(id) {
     return userWithoutPassword;
 }
 
+async function userExists(userData){
+    let exists=false;
+
+    const username = await users.find(u => u.username === userData.username);
+    const mail = await users.find(u => u.email === userData.email);
+
+    if(username){
+        return true;
+    }
+
+    if(mail){
+        return true;
+    }
+
+    return false;
+}
+
 async function updateUser(userData) {
     // getAll();
     //console.log(users);
@@ -89,6 +108,7 @@ async function updateUser(userData) {
     user.lastName = userData.lastName;
     user.email = userData.email;
     user.role = userData.role;
+    user.is_active = userData.is_active;
 
     pool.query(`UPDATE users SET username=$1, password=$2, "firstName"=$3, "lastName"=$4, email=$5, role=$6 WHERE id=$7`, [user.username, user.password, user.firstName, user.lastName, user.email, user.role, user.id], (err, res) => {
         if (err) {
@@ -99,6 +119,28 @@ async function updateUser(userData) {
     });
     //console.log("SERVICE");
     //console.log(user);
+
+    return user;
+}
+
+async function updateStatus(userData) {
+    // getAll();
+    //console.log(users);
+    let user;
+    user = users.find(function (b) {
+        return b.id === userData.id;
+    });
+    //console.log(user);
+    
+    user.is_active = userData.is_active;
+
+    pool.query(`UPDATE users SET is_active=$1 WHERE id=$2`, [user.is_active, user.id], (err, res) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        return res.rows ? res.rows : users;
+    });
 
     return user;
 }

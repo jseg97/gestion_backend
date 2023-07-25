@@ -6,10 +6,12 @@ const Role = require('_helpers/role');
 
 // routes
 router.post('/authenticate', authenticate);     // public route
-router.get('/', authorize(Role.Admin, Role.BlogAdmin), getAll); // admin only
+router.get('/', authorize([Role.Admin, Role.BlogAdmin]), getAll); // admin only
+// router.get('/validate', userExists); // admin only
 // router.get('/ga', getAll); // admin only
 router.get('/:id', authorize(), getById);       // all authenticated users
 router.put('/', authorize(), update);       // all authenticated users
+router.put('/status', authorize(), updateStatus);       // all authenticated users
 router.post('/', authorize(), create);       // all authenticated users
 // router.post('/', createPublicly);       // all authenticated users
 
@@ -42,18 +44,34 @@ function getById(req, res, next) {
 }
 
 function update(req, res, next) {
-    console.log("LLEGO");
     console.log(req.body);
     userService.updateUser(req.body)
         .then(user => user ? res.json(user) : res.status(400).json({ message: 'Username or password is incorrect' }))
         .catch(err => next(err));
 }
 
-function create(req, res, next) {
+function updateStatus(req, res, next) {
+    console.log("LLEGO");
     console.log(req.body);
-    userService.createUser(req.body)
-        .then(user => user ? res.json(user) : res.status(400).json({ message: 'Username or password is incorrect' }))
+    userService.updateStatus(req.body)
+        .then(user => user ? res.json(user) : res.status(400).json({ message: 'Not updated' }))
         .catch(err => next(err));
+}
+
+async function create(req, res, next) {
+    console.log(req.body);
+    let ex = await userService.userExists(req.body);
+
+    // if(ex){
+    //     res.json({ message: 'Username or mail already exists' })
+    // }else{
+    //     userService.createUser(req.body)
+    //     .then(user => user ? res.json(user) : res.status(400).json({ message: 'User not created' }))
+    //     .catch(err => next(err));
+    // }
+    userService.createUser(req.body)
+        .then(user => user ? res.json(user) : res.status(400).json({ message: 'User not created' }))
+        .catch(err => next(err));    
 }
 
 function createPublicly(req, res, next) {
