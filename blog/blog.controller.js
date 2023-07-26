@@ -8,9 +8,9 @@ const Role = require('_helpers/role');
 // router.post('/authenticate', authenticate);     // public route
 router.get('/', getAll); // admin only
 router.get('/:id', getById); // admin only
-router.put('/', authorize(Role.BlogAdmin), updateBlog);
-router.post('/', authorize(Role.BlogAdmin), createBlog);
-router.delete('/', authorize(Role.BlogAdmin), inactiveBlog);
+router.put('/', authorize([Role.BlogAdmin, Role.Admin]), updateBlog);
+router.post('/', authorize([Role.BlogAdmin, Role.Admin]), createBlog);
+router.delete('/', authorize([Role.BlogAdmin, Role.Admin]), inactiveBlog);
 // router.get('/:id', authorize(), getById);       // all authenticated users
 module.exports = router;
 
