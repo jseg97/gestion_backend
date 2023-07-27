@@ -37,7 +37,7 @@ module.exports = {
 
 async function authenticate({ username, password }) {
     console.log({ username, password });
-    await getAll();
+    await getAllActive();
     const user = users.find(u => u.username === username && u.password === password);
     if (user) {
         const token = jwt.sign({ sub: user.id, role: user.role }, config.secret);
@@ -56,6 +56,20 @@ async function authenticate({ username, password }) {
 
 async function getAll() {
     pool.query("SELECT * FROM USERS", (err, res) => {
+        // console.log("LLEGO" + res.rowCount);
+        // console.log(res.rows);
+        // pool.end();
+        if(res !== undefined)
+            users = res.rows;
+    });
+    return users.map(u => {
+        const { password, ...userWithoutPassword } = u;
+        return userWithoutPassword;
+    });
+}
+
+async function getAllActive() {
+    pool.query("SELECT * FROM users u WHERE u.is_active='Y' ", (err, res) => {
         // console.log("LLEGO" + res.rowCount);
         // console.log(res.rows);
         // pool.end();

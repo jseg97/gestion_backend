@@ -12,14 +12,14 @@ router.get('/', authorize([Role.Admin, Role.BlogAdmin]), getAll); // admin only
 router.get('/:id', authorize(), getById);       // all authenticated users
 router.put('/', authorize(), update);       // all authenticated users
 router.put('/status', authorize(), updateStatus);       // all authenticated users
-router.post('/', authorize(), create);       // all authenticated users
+router.post('/', create);       // all authenticated users
 // router.post('/', createPublicly);       // all authenticated users
 
 module.exports = router;
 
 function authenticate(req, res, next) {
     userService.authenticate(req.body)
-        .then(user => user ? res.json(user) : res.status(400).json({ message: 'Username or password is incorrect' }))
+        .then(user => user ? res.json(user) : res.status(400).json({ message: 'Usuario o contraseña incorrectos' }))
         .catch(err => next(err));
 }
 
