@@ -31,7 +31,8 @@ function getAll(req, res, next) {
 
 function getById(req, res, next) {
     const currentUser = req.user;
-    const id = parseInt(req.params.id);
+    // const id = parseInt(req.params.id);
+    const id = req.params.id;
 
     // only allow admins to access other user records
     if (id !== currentUser.sub && currentUser.role !== Role.Admin) {
@@ -60,15 +61,6 @@ function updateStatus(req, res, next) {
 
 async function create(req, res, next) {
     console.log(req.body);
-    let ex = await userService.userExists(req.body);
-
-    // if(ex){
-    //     res.json({ message: 'Username or mail already exists' })
-    // }else{
-    //     userService.createUser(req.body)
-    //     .then(user => user ? res.json(user) : res.status(400).json({ message: 'User not created' }))
-    //     .catch(err => next(err));
-    // }
     userService.createUser(req.body)
         .then(user => user ? res.json(user) : res.status(400).json({ message: 'User not created' }))
         .catch(err => next(err));    

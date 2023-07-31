@@ -83,10 +83,11 @@ async function getAllActive() {
 }
 
 async function getById(id) {
-    const user = users.find(u => u.id === parseInt(id));
+    const user = users.find(u => parseInt(u.id) === parseInt(id));
     if (!user) return;
     const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    // return userWithoutPassword;
+    return user;
 }
 
 async function userExists(userData){
@@ -107,7 +108,8 @@ async function userExists(userData){
 }
 
 async function updateUser(userData) {
-    // getAll();
+    await getAll();
+    let otherUsers = users.filter(u => u.id != userData.id)
     //console.log(users);
     let user;
     user = users.filter(function (b) {
@@ -124,17 +126,30 @@ async function updateUser(userData) {
     user.role = userData.role;
     user.is_active = userData.is_active;
 
-    pool.query(`UPDATE users SET username=$1, password=$2, "firstName"=$3, "lastName"=$4, email=$5, role=$6 WHERE id=$7`, [user.username, user.password, user.firstName, user.lastName, user.email, user.role, user.id], (err, res) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-        return res.rows ? res.rows : users;
-    });
+    const userExist = otherUsers.find(u => u.username === userData.username || u.email === userData.email);
+    if (userExist) {
+        return { "success": false, "message": "Usuario o correo electrónico ya se encuentra registrado" };
+    }
+
+    try {
+        const res = pool.query(`UPDATE users SET username=$1, password=$2, "firstName"=$3, "lastName"=$4, email=$5, role=$6 WHERE id=$7`, [user.username, user.password, user.firstName, user.lastName, user.email, user.role, user.id]);
+        await getAll();
+    } catch (e) {
+        return { "success": false, "message": e.message };
+    }
+    return { "success": true, "message":"¡Usuario actualizado!", "data": users.find(u => u.id == user.id)};
+
+    // pool.query(`UPDATE users SET username=$1, password=$2, "firstName"=$3, "lastName"=$4, email=$5, role=$6 WHERE id=$7`, [user.username, user.password, user.firstName, user.lastName, user.email, user.role, user.id], (err, res) => {
+    //     if (err) {
+    //         console.error(err);
+    //         return;
+    //     }
+    //     return res.rows ? res.rows : users;
+    // });
     //console.log("SERVICE");
     //console.log(user);
 
-    return user;
+    // return user;
 }
 
 async function updateStatus(userData) {
@@ -161,6 +176,12 @@ async function updateStatus(userData) {
 
 
 async function createUser(userData) {
+    await getAll();
+    
+    const userExist = users.find(u => u.username === userData.username || u.email === userData.email);
+    if (userExist) {
+        return { "success": false, "message": "Usuario o correo electrónico ya se encuentra registrado" };
+    }
     let user = {};
     console.log("CREANDO");
     console.log(userData);
@@ -174,11 +195,11 @@ async function createUser(userData) {
 
     try {
         const res = await pool.query(`INSERT INTO users (username, password, "firstName", "lastName", email, role, is_active) VALUES ($1, $2, $3, $4, $5, $6, $7)`, [user.username, user.password, user.firstName, user.lastName, user.email, user.role, user.is_active]);
-        users.push(user);
+        await getAll();
     } catch (e) {
         return { "success": false, "message": e.message };
     }
-    return { "success": true, "message":"Created successfully", "data": users};
+    return { "success": true, "message":"¡Nuevo usuario registrado!", "data": users};
 }
 
 async function createUserAsUser(userData) {
