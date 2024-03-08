@@ -1,5 +1,6 @@
 const { Pool } = require('pg');
 const fs = require('fs');
+const config = require('../config.js');
 // const blogs = [
 //     { id: 1, title: 'Este es un titulo de" blog plena', description: 'Descripcion de este blog', content: 'texto 11111111111111111bla bla bla bla', created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
 //     { id: 2, title: 'Este es un titulo de blog 2 oss', description: 'Descripcion de este blog', content: 'texto 22222222222222222bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
@@ -23,15 +24,12 @@ module.exports = {
 };
 
 const pool = new Pool({
-    user: 'doadmin',
-    host: 'db-postgresql-nyc3-55749-do-user-14409895-0.b.db.ondigitalocean.com', // Replace this with your PostgreSQL host
-    database: 'Prueba',
-    password: 'AVNS_u6LrVShOfxUpCg4WnGL',
-    port: 25061, // Default PostgreSQL port is 5432
-    max: 20,
-    ssl: {
-        ca: fs.readFileSync('./ca-certificate.crt'),
-    }
+    user: 'postgres',
+    host: '172.17.0.2', // Replace this with your PostgreSQL host
+    database: 'postgres',
+    password: 'postgres',
+    port: 5432, // Default PostgreSQL port is 5432
+    max: 20
 });
 
 async function getAll() {

@@ -13,16 +13,25 @@ const fs = require('fs');
 
 let users = [];
 const pool = new Pool({
-    user: 'doadmin',
-    host: 'db-postgresql-nyc3-55749-do-user-14409895-0.b.db.ondigitalocean.com', // Replace this with your PostgreSQL host
+    user: 'postgres',
+    host: '172.17.0.2', // Replace this with your PostgreSQL host
     database: 'postgres',
-    password: 'AVNS_u6LrVShOfxUpCg4WnGL',
-    port: 25060, // Default PostgreSQL port is 5432
-    max: 20,
-    ssl: {
-        ca: fs.readFileSync('./ca-certificate.crt'),
-    }
+    password: 'postgres',
+    port: 5432, // Default PostgreSQL port is 5432
+    max: 20
 });
+
+// const pool = new Pool({
+//     user: 'doadmin',
+//     host: 'db-postgresql-nyc3-55749-do-user-14409895-0.b.db.ondigitalocean.com', // Replace this with your PostgreSQL host
+//     database: 'postgres',
+//     password: 'AVNS_u6LrVShOfxUpCg4WnGL',
+//     port: 25060, // Default PostgreSQL port is 5432
+//     max: 20,
+//     ssl: {
+//         ca: fs.readFileSync('./ca-certificate.crt'),
+//     }
+// });
 
 module.exports = {
     authenticate,
