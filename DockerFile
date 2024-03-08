@@ -1,13 +1,24 @@
-FROM node
+FROM node:14.21.3
+
+# Define de the working directory
+WORKDIR /usr/src/gestion_backend
 
 # Install app dependencies
-COPY package*.json ./
+COPY package.json ./
 
 RUN npm install --force
+
+# Set deploy enviroment
+
+#ENV NODE_ENV production
+ENV NODE_ENV dev
 
 # Bundle app source
 COPY . .
 
-EXPOSE 3004
+EXPOSE 4001
+#EXPOSE 80
 
-CMD [ "npm", "start" ]
+ENTRYPOINT [ "node" ]
+
+CMD [ "./server.js" ]
