@@ -13,11 +13,11 @@ const fs = require('fs');
 
 let users = [];
 const pool = new Pool({
-    user: 'postgres',
-    host: '172.17.0.2', // Replace this with your PostgreSQL host
-    database: 'postgres',
-    password: 'postgres',
-    port: 5432, // Default PostgreSQL port is 5432
+    user: config.DB_USER,
+    host: config.DB_HOST, // Replace this with your PostgreSQL host
+    database: config.DB_NAME,
+    password: config.DB_PASSWORD,
+    port: config.PORT, // Default PostgreSQL port is 5432
     max: 20
 });
 
@@ -169,7 +169,7 @@ async function updateStatus(userData) {
         return b.id === userData.id;
     });
     //console.log(user);
-    
+
     user.is_active = userData.is_active;
 
     pool.query(`UPDATE users SET is_active=$1 WHERE id=$2`, [user.is_active, user.id], (err, res) => {
@@ -186,7 +186,7 @@ async function updateStatus(userData) {
 
 async function createUser(userData) {
     await getAll();
-    
+
     const userExist = users.find(u => u.username === userData.username || u.email === userData.email);
     if (userExist) {
         return { "success": false, "message": "Usuario o correo electrónico ya se encuentra registrado" };

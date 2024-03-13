@@ -10,7 +10,7 @@ const config = require('../config.js');
 //     { id: 6, title: 'Este es un titulo de blog 3 meen', description: 'Descripcion de este blog', content: 'texto 333333333333333bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)} ,
 //     { id: 7, title: 'Este es un titulo de" blog plena', description: 'Descripcion de este blog', content: 'texto 11111111111111111bla bla bla bla', created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
 //     { id: 8, title: 'Este es un titulo de blog 2 oss', description: 'Descripcion de este blog', content: 'texto 22222222222222222bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
-//     { id: 9, title: 'Este es un titulo de blog 3 meen', description: 'Descripcion de este blog', content: 'texto 333333333333333bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)}     
+//     { id: 9, title: 'Este es un titulo de blog 3 meen', description: 'Descripcion de este blog', content: 'texto 333333333333333bla bla bla bla' , created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)}
 // ];
 
 let blogs = [];
@@ -24,11 +24,11 @@ module.exports = {
 };
 
 const pool = new Pool({
-    user: 'postgres',
-    host: '172.17.0.2', // Replace this with your PostgreSQL host
-    database: 'postgres',
-    password: 'postgres',
-    port: 5432, // Default PostgreSQL port is 5432
+    user: config.DB_USER,
+    host: config.DB_HOST, // Replace this with your PostgreSQL host
+    database: config.DB_NAME,
+    password: config.DB_PASSWORD,
+    port: config.PORT, // Default PostgreSQL port is 5432
     max: 20
 });
 
@@ -53,7 +53,7 @@ async function updateBlog(blogData) {
     if(!blogData.is_active){
         blogData["is_active"]=blog.is_active;
     }
-    
+
     blogData["updated"] = new Date().toISOString().slice(0, 10);
     console.log("List");
     const res = await pool.query(`UPDATE blog SET title=$1, description=$2, content=$3, updated=$4, user_updated=$5, is_active=$6 WHERE id=$7`, [blogData.title, blogData.description, blogData.content, blogData.updated, blogData.user_updated, blogData.is_active, blogData.id]);
