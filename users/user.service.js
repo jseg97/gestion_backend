@@ -1,8 +1,9 @@
-﻿const config = require('config.json');
+﻿// const config = require('config.json');
 const jwt = require('jsonwebtoken');
 const Role = require('_helpers/role');
-const { Pool } = require('pg');
+// const { Pool } = require('pg');
 const fs = require('fs');
+const pool = require('../config/db');
 
 // users hardcoded for simplicity, store in a db for production applications
 // const users = [
@@ -12,14 +13,14 @@ const fs = require('fs');
 // ];
 
 let users = [];
-const pool = new Pool({
-    user: config.DB_USER,
-    host: config.DB_HOST, // Replace this with your PostgreSQL host
-    database: config.DB_NAME,
-    password: config.DB_PASSWORD,
-    port: config.PORT, // Default PostgreSQL port is 5432
-    max: 20
-});
+// const pool = new Pool({
+//     user: config.DB_USER,
+//     host: config.DB_HOST, // Replace this with your PostgreSQL host
+//     database: config.DB_NAME,
+//     password: config.DB_PASSWORD,
+//     port: config.PORT, // Default PostgreSQL port is 5432
+//     max: 20
+// });
 
 // const pool = new Pool({
 //     user: 'doadmin',
@@ -64,7 +65,7 @@ async function authenticate({ username, password }) {
 
 
 async function getAll() {
-    pool.query("SELECT * FROM USERS", (err, res) => {
+    pool.query("SELECT * FROM USERS u ORDER BY u.id ASC", (err, res) => {
         // console.log("LLEGO" + res.rowCount);
         // console.log(res.rows);
         // pool.end();

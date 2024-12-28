@@ -1,12 +1,5 @@
-// const comments = [
-//     { id: 1, userId: 1, content: 'b1Esto es un comentario creado por user 1', blogId: 1, created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
-//     { id: 2, userId: 2, content: 'b3Esto es un comentario creado por user 2', blogId: 3, created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
-//     { id: 3, userId: 3, content: 'b2Esto es un comentario creado por user 3', blogId: 2, created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)},
-//     { id: 4, userId: 3, content: 'b2Esto es un comentario creado por user 3', blogId: 2, created_at: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString().slice(0,10)}
-// ];
-
-const { Pool } = require('pg');
 const fs = require('fs');
+const pool = require('../config/db');
 
 let comments=[];
 module.exports = {
@@ -18,19 +11,15 @@ module.exports = {
     getCommentById
 };
 
-const pool = new Pool({
-    user: config.DB_USER,
-    host: config.DB_HOST, // Replace this with your PostgreSQL host
-    database: config.DB_NAME,
-    password: config.DB_PASSWORD,
-    port: config.PORT, // Default PostgreSQL port is 5432
-    max: 20
-});
-
 async function getAll() {
-    const res = await pool.query(`SELECT c.*, u."firstName" first_name FROM comments c INNER JOIN users u ON c.user_create = u.id`);
-    comments = res.rows;
-    return comments;
+    try{
+        const res = await pool.query(`SELECT c.*, u."firstName" first_name FROM comments c INNER JOIN users u ON c.user_create = u.id`);
+        comments = res.rows;
+        return comments;
+    }catch(e){
+        console.error('Error fetching comments:', err);
+        throw err;
+    }    
 }
 
 // const res = await pool.query(`SELECT b.*, u."firstName", u.id user_id FROM blog b INNER JOIN users u ON b.user_created = u.id`);

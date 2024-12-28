@@ -14,7 +14,7 @@
     },
     "scripts": {
         "start": "export NODE_ENV=production && node ./server.js",
-        "test": "node ./server.js"
+        "test": "export NODE_ENV=dev && node ./server.js"
     },
     "dependencies": {
         "body-parser": "^1.18.3",
