@@ -1,4 +1,4 @@
-﻿// const config = require('config.json');
+﻿const config = require('config.json');
 const jwt = require('jsonwebtoken');
 const Role = require('_helpers/role');
 // const { Pool } = require('pg');
